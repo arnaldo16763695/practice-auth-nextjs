@@ -17,7 +17,7 @@ import loginAction from '@/app/actions/auth-action'
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 
-const LoginForm = () => {
+const LoginForm = ({isVerified}:{isVerified: boolean}) => {
 
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition();
@@ -47,6 +47,13 @@ const LoginForm = () => {
   return (
     <div className='max-w-52'>
       <h1>Login</h1>
+      {
+        isVerified && (
+          <p className='text-center text-green-500 mb-5 text-sm'>
+            The Email has been Verified
+          </p>
+        )
+      }
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <FormField

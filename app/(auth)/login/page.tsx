@@ -1,10 +1,11 @@
 import LoginForm from '@/components/LoginForm'
 
-const LoginPage = () => {
+const LoginPage = ({searchParams}:{searchParams : {verified: string}}) => {
+const isVerified = searchParams.verified === "true";
   return (
     <div>LoginPage
 
-      <LoginForm/>
+      <LoginForm isVerified={isVerified}/>
     </div>
   )
 }

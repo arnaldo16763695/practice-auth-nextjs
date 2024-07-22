@@ -5,7 +5,10 @@ import bcrypt from 'bcryptjs'
 
 import Credentials from "next-auth/providers/credentials"
 import { loginSchema } from "./lib/zod"
+import {nanoid} from 'nanoid'
+import { sedEmailVerification } from "@/lib/mail"
 // Notice this is only an object, not a full Auth.js instance
+
 export default {
     providers: [
         Credentials({
@@ -32,6 +35,42 @@ export default {
                 const isValid = await bcrypt.compare(data.password, user?.password)
 
                 if (!isValid) throw new Error("Invalid credentials ");
+
+                //email verification
+
+                if(!user.emailVerified){
+
+                    const verifyTokenExist = await db.verificationToken.findFirst({
+                        where:{
+                            identifier: user.email
+                        }
+                    })
+                    
+                    //if token exist, we must to delete it
+                    if (verifyTokenExist?.identifier) {
+                        await db.verificationToken.delete({
+                            where: {
+                                identifier : user.email
+                            }
+                        })
+                    }
+
+                    const token = nanoid();
+                    await db.verificationToken.create({
+                        data: {
+                            identifier: user.email,
+                            token,
+                            expires: new Date(Date.now() + 1000 * 60 * 24)
+                        }
+                    });
+
+                    // send email verification
+                    await sedEmailVerification(user.email, token)
+
+                    throw new Error("Please check Email verification")
+
+                    
+                }
 
                 return user;
 
